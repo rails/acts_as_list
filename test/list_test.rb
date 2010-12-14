@@ -66,8 +66,6 @@ class ListTest < Test::Unit::TestCase
   end
 
   def test_correct_default_position_when_class_has_a_default_scope_ordering_by_position
-    #default_scope also added in add_troublesome_scope method so that it also covers all other tests
-    #duplicated code in case rest of code changes and this does not.
     ListMixin.class_eval do
       default_scope order(:pos)
     end
