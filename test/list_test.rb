@@ -54,6 +54,7 @@ class ArrayScopeListMixin < Mixin
 end
 
 class ListTest < Test::Unit::TestCase
+  
 
   def setup
     setup_db
@@ -62,6 +63,17 @@ class ListTest < Test::Unit::TestCase
 
   def teardown
     teardown_db
+  end
+
+  def test_correct_default_position_when_class_has_a_default_scope_ordering_by_position
+    #default_scope also added in add_troublesome_scope method so that it also covers all other tests
+    #duplicated code in case rest of code changes and this does not.
+    ListMixin.class_eval do
+      default_scope order(:pos)
+    end
+    2.times { ListMixin.create! :parent_id => 5678 }
+    @three = ListMixin.create! :parent_id => 5678
+    assert_equal 3, @three.pos
   end
 
   def test_reordering
@@ -245,7 +257,7 @@ class ListTest < Test::Unit::TestCase
     assert_equal 2, ListMixin.find(2).pos
     assert_equal 2, ListMixin.find(3).pos
     assert_equal 3, ListMixin.find(4).pos
-  end
+  end 
 
 end
 
