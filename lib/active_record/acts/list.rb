@@ -62,10 +62,11 @@ module ActiveRecord
           end
 
     
-          self.class_eval <<-DEF
-            "scope :list, order('position asc')"
-          DEF
+          self.class_eval do
+            send(:scope,:list,order('position asc'))
+          end
 
+          
           class_eval <<-EOV
             include ActiveRecord::Acts::List::InstanceMethods
   
