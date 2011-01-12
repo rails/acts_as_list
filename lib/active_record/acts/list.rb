@@ -63,7 +63,7 @@ module ActiveRecord
 
     
           self.class_eval do
-            "scope :list, order('#{configuration[:column]}')"
+            "scope :list, order('position asc')"
           end
 
           class_eval <<-EOV
