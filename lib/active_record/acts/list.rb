@@ -63,7 +63,7 @@ module ActiveRecord
 
     
           self.class_eval do
-          #  send(:scope,:list,order('position asc'))
+            send(:scope,:list,order('position asc'))
           end
 
           
