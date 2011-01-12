@@ -31,11 +31,13 @@ module ActiveRecord
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "1 = 1" }
+          configuration = { :column => "position", :scope => "1 = 1",:limited_list=>false }
           configuration.update(options) if options.is_a?(Hash)
 
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
+          self.class.send(:define_method,"limited_list?") { configuration[:limited_list] }
+          
           if configuration[:scope].is_a?(Symbol)
             scope_condition_method = %(
               def scope_condition
@@ -93,7 +95,7 @@ module ActiveRecord
             increment_position
           end
         end
-
+        
         # Swap positions with the next higher item, if one exists.
         def move_higher
           return unless higher_item
@@ -196,7 +198,7 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = "#{conditions} AND #{self.class.primary_key} != #{except.id}" if except
-            acts_as_list_class.find(:first, :conditions => conditions, :order => "#{position_column} DESC")
+            acts_as_list_class.where(conditions).order("#{position_column} DESC").first
           end
 
           # Forces item to assume the bottom position in the list.
