@@ -58,6 +58,7 @@ class ListTest < Test::Unit::TestCase
   def setup
     setup_db
     (1..4).each { |counter| ListMixin.create! :pos => counter, :parent_id => 5 }
+    
   end
 
   def teardown

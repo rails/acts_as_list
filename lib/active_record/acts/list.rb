@@ -31,13 +31,17 @@ module ActiveRecord
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "1 = 1",:limited_list=>false }
+          configuration = { :column => "position", :scope => "order('position asc')",:limited_list=>false }
           configuration.update(options) if options.is_a?(Hash)
 
-          configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
-
+          
+          
           self.class.send(:define_method,"limited_list?") { configuration[:limited_list] }
           
+          #here if your scope receives a :symbol, it will try to add "_id" to the symbol, unless it has already an id in the end
+          configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
+
+                    
           if configuration[:scope].is_a?(Symbol)
             scope_condition_method = %(
               def scope_condition
@@ -57,9 +61,15 @@ module ActiveRecord
             scope_condition_method = "def scope_condition() \"#{configuration[:scope]}\" end"
           end
 
+    
+          self.class_eval do
+            "scope :list, order('#{configuration[:column]}')"
+          end
+
           class_eval <<-EOV
             include ActiveRecord::Acts::List::InstanceMethods
-
+  
+            
             def acts_as_list_class
               ::#{self.name}
             end
@@ -68,8 +78,10 @@ module ActiveRecord
               '#{configuration[:column]}'
             end
 
+            
             #{scope_condition_method}
 
+            
             before_destroy :decrement_positions_on_lower_items
             before_create  :add_to_list_bottom
           EOV
@@ -82,6 +94,7 @@ module ActiveRecord
       # the first in the list of all chapters.
       module InstanceMethods
         # Insert the item at the given position (defaults to the top position of 1).
+        #i just changed here to verify if the limited_list is true
         def insert_at(position = 1)
           insert_at_position(position)
         end
