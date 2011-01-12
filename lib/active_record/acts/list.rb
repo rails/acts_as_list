@@ -165,9 +165,7 @@ module ActiveRecord
         # Return the next lower item in the list.
         def lower_item
           return nil unless in_list?
-          acts_as_list_class.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}"
-          )
+          acts_as_list_class.where("#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}").first
         end
 
         # Test if this record is in a list
