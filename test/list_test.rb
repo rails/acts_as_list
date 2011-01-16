@@ -45,7 +45,8 @@ class ListTest < Test::Unit::TestCase
     (1..4).each do |counter| 
       Article.create! :position => counter, :parent_id => 5 
       @myItems.push Article.last.id
-    end    
+    end
+    @articles = Article.where(:parent_id=> 5).order(:position)
   end
   
   def teardown
@@ -64,24 +65,27 @@ class ListTest < Test::Unit::TestCase
   end
   
   def test_items_are_ordered
-    assert_equal @myItems, Article.where(:parent_id=> 5).order(:position).map(&:id)
+    assert_equal @myItems, @articles.all.map(&:id)
   end
   
   def test_move_lower
     Article.find(2).move_lower
-    assert_equal @myItems.move(1,2), Article.where(:parent_id => 5).order(:position).map(&:id)
+    assert_equal @myItems.move(1,2), @articles.all.map(&:id)
   end
   
   def test_move_higher
     Article.find(2).move_higher
-    assert_equal @myItems.move(0,1), Article.where(:parent_id => 5).order(:position).map(&:id)
+    assert_equal @myItems.move(0,1), @articles.all.map(&:id)
   end
   
-  def test_move_to_top_and_bottom
-    Article.find(1).move_to_bottom
-    assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5).order(:position).map(&:id)
-    Article.find(1).move_to_top
-    assert_equal @myItems.move(-1,0), Article.where(:parent_id=> 5).order(:position).map(&:id)#
+  def test_move_to_bottom
+    Article.first.move_to_bottom
+    assert_equal @myItems.move(0,-1), @articles.all.map(&:id)
+  end
+  
+  def test_move_to_top
+    Article.last.move_to_top
+    assert_equal @myItems.move(-1,0), @articles.all.map(&:id)  
   end
   
   def test_nil_return
