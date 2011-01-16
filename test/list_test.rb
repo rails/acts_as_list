@@ -79,7 +79,7 @@ class ListTest < Test::Unit::TestCase
     Article.find(1).move_to_bottom
     assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5).order(:position).map(&:id)
     Article.find(1).move_to_top
-    assert_equal @myItems, Article.where(:parent_id=> 5).order(:position).map(&:id)#
+    assert_equal @myItems.move(-1,0), Article.where(:parent_id=> 5).order(:position).map(&:id)#
   end
   
   def test_nil_return
