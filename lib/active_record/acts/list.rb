@@ -31,7 +31,7 @@ module ActiveRecord
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "order('position asc')",:limited_list=>false }
+          configuration = { :column => "position", :scope => "1=1",:limited_list=>false }
           configuration.update(options) if options.is_a?(Hash)
 
           
