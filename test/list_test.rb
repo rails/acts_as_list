@@ -12,6 +12,8 @@ class Array
   end
 end
 
+#TODO the other tests should be refactored as ArrayScopeListTest
+
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
 def setup_db
@@ -88,6 +90,56 @@ class ListTest < Test::Unit::TestCase
     assert_equal Article.find(3), Article.find(4).higher_item
     assert_nil Article.last.lower_item
 
+  end
+end
+
+class ArrayScopeListTest < Test::Unit::TestCase
+
+  def setup
+    @myItems = []
+    Article.send :acts_as_list, :column => "position", :scope => [:parent_id, :parent_type]
+
+    setup_db
+    (1..4).each do |counter| 
+      Article.create! :position => counter, :parent_id => 5, :parent_type => 'ParentClass'
+      @myItems.push Article.last.id
+    end
+    @articles = Article.where(:parent_id=> 5,:parent_type=>'ParentClass').order(:position)
+  end
+
+  def teardown
+    teardown_db
+  end
+  
+  def test_items_are_ordered
+    assert_equal @myItems, @articles.all.map(&:id)
+  end
+  
+  def test_move_lower
+    Article.find(2).move_lower
+    assert_equal @myItems.move(1,2), @articles.all.map(&:id)
+  end
+  
+  def test_move_higher
+    Article.find(2).move_higher
+    assert_equal @myItems.move(0,1), @articles.all.map(&:id)
+  end
+  
+  def test_move_to_bottom
+    Article.first.move_to_bottom
+    assert_equal @myItems.move(0,-1), @articles.all.map(&:id)
+  end
+  
+  def test_move_to_top
+    Article.last.move_to_top
+    assert_equal @myItems.move(-1,0), @articles.all.map(&:id)
+  end
+  
+  def test_nil_return
+    assert_equal Article.find(2), Article.find(1).lower_item
+    assert_nil Article.first.higher_item
+    assert_equal Article.find(3), Article.find(4).higher_item
+    assert_nil Article.last.lower_item
   end
 end
 
