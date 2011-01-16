@@ -97,6 +97,8 @@ end
 class Comment < Article
 end
 
+#those tests are just repetition with different "seeds"
+#i think we can rip it out
 class ListSubTest < Test::Unit::TestCase
 
   def setup
@@ -112,9 +114,34 @@ class ListSubTest < Test::Unit::TestCase
     teardown_db
   end
   
-  def test_reordering1
+  def test_items_are_ordered
     assert_equal @myItems, Article.where(:parent_id=> 5000).order(:position).map(&:id)
   end
+  
+  def test_move_lower
+    Article.find(2).move_lower
+    assert_equal @myItems.move(1,2), Article.where(:parent_id => 5000).order(:position).map(&:id)
+  end
+  
+  def test_move_higher
+    Article.find(2).move_higher
+    assert_equal @myItems.move(0,1), Article.where(:parent_id => 5000).order(:position).map(&:id)
+  end
+  
+  def test_move_to_top_and_bottom
+    Article.find(1).move_to_bottom
+    assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5000).order(:position).map(&:id)
+    Article.find(1).move_to_top
+    assert_equal @myItems.move(-1,0), Article.where(:parent_id=> 5000).order(:position).map(&:id)#
+  end
+  
+  def test_nil_return
+    assert_equal Article.find(2), Article.find(1).lower_item
+    assert_nil Article.first.higher_item
+    assert_equal Article.find(3), Article.find(4).higher_item
+    assert_nil Article.last.lower_item
+  end
+
 end
 #class Article < ActiveRecord::Base
 #  acts_as_list :column => "position", :scope => [:parent_id, :parent_type]  
