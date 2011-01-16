@@ -91,6 +91,25 @@ class ListTest < Test::Unit::TestCase
   end
 end
 
+class ScopeAsStringTest < Test::Unit::TestCase
+  def setup
+    setup_db
+    Article.send :acts_as_list, :column => "position", :scope => 'parent_id = #{parent_id}'
+  end
+  
+  def teardown
+    teardown_db
+  end
+
+  def test_with_string_based_scope
+    new = Article.create(:parent_id => 500)
+    assert_equal 1, new.position
+    assert new.first?
+    assert new.last?
+  end
+
+end
+
 class Post < Article
 end
 
