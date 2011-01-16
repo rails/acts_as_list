@@ -75,10 +75,18 @@ class ListTest < Test::Unit::TestCase
     assert_equal @myItems.move(0,1), Article.where(:parent_id => 5).order(:position).map(&:id)
   end
   
-  def move_to_top_and_bottom
+  def test_move_to_top_and_bottom
     Article.find(1).move_to_bottom
     assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5).order(:position).map(&:id)
     Article.find(1).move_to_top
     assert_equal @myItems, Article.where(:parent_id=> 5).order(:position).map(&:id)#
+  end
+  
+  def test_nil_return
+    assert_equal Article.find(2), Article.find(1).lower_item
+    assert_nil Article.first.higher_item
+    assert_equal Article.find(3), Article.find(4).higher_item
+    assert_nil Article.last.lower_item
+
   end
 end
