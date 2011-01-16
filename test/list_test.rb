@@ -33,7 +33,7 @@ def teardown_db
 end
 
 class Article < ActiveRecord::Base
-  acts_as_list 
+  acts_as_list :scope => :parent
 end
 
 class ListTest < Test::Unit::TestCase
@@ -90,3 +90,32 @@ class ListTest < Test::Unit::TestCase
 
   end
 end
+
+class Post < Article
+end
+
+class Comment < Article
+end
+
+class ListSubTest < Test::Unit::TestCase
+
+  def setup
+    @myItems = []
+    setup_db
+    (1..4).each do |i| 
+      ((i % 2 == 1) ? Comment : Post).create! :position => i, :parent_id => 5000 
+      @myItems.push Article.last.id
+    end
+  end
+
+  def teardown
+    teardown_db
+  end
+  
+  def test_reordering1
+    assert_equal @myItems, Article.where(:parent_id=> 5000).order(:position).map(&:id)
+  end
+end
+#class Article < ActiveRecord::Base
+#  acts_as_list :column => "position", :scope => [:parent_id, :parent_type]  
+#end
