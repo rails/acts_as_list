@@ -39,13 +39,11 @@ end
 class ListTest < Test::Unit::TestCase
   def setup
     @myItems = []
-    @myItemsOriginal
     setup_db
     (1..4).each do |counter| 
       Article.create! :position => counter, :parent_id => 5 
       @myItems.push Article.last.id
-    end
-    @myItemsOriginal = @myItems.dup
+    end    
   end
   
   def teardown
@@ -63,25 +61,24 @@ class ListTest < Test::Unit::TestCase
     assert @article.respond_to?(:move_higher), true
   end
   
-  def test_reordering
+  def test_items_are_ordered
     assert_equal @myItems, Article.where(:parent_id=> 5).order(:position).map(&:id)
+  end
+  
+  def test_move_lower
     Article.find(2).move_lower
     assert_equal @myItems.move(1,2), Article.where(:parent_id => 5).order(:position).map(&:id)
+  end
+  
+  def test_move_higher
     Article.find(2).move_higher
-    @myItems = @myItemsOriginal.dup
-    assert_equal @myItems, Article.where(:parent_id => 5).order(:position).map(&:id)
+    assert_equal @myItems.move(0,1), Article.where(:parent_id => 5).order(:position).map(&:id)
+  end
+  
+  def move_to_top_and_bottom
     Article.find(1).move_to_bottom
     assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5).order(:position).map(&:id)
-
     Article.find(1).move_to_top
-    @myItems = @myItemsOriginal.dup
-    assert_equal @myItems, Article.where(:parent_id=> 5).order(:position).map(&:id)
-
-    #ListMixin.find(2).move_to_bottom
-    #assert_equal [1, 3, 4, 2], ListMixin.where(:parent_id=> 5).order(:pos).map(&:id)
-
-    #ListMixin.find(4).move_to_top
-    #assert_equal [4, 1, 3, 2], ListMixin.where(:parent_id=> 5).order(:pos).map(&:id)
-
+    assert_equal @myItems, Article.where(:parent_id=> 5).order(:position).map(&:id)#
   end
 end
