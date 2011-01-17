@@ -107,6 +107,11 @@ class ListTest < Test::Unit::TestCase
     assert_equal Article.find(3), Article.find(4).higher_item
     assert_nil Article.last.lower_item
   end
+  
+  def test_delete_middle
+    Article.find(2).destroy
+    assert @myItems.delete_at(3), Article.where(:parent_id=>5).all.map(&:id)
+  end
 end
 
 class ArrayScopeListTest < Test::Unit::TestCase
