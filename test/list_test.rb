@@ -64,6 +64,19 @@ class ListTest < Test::Unit::TestCase
     assert @article.respond_to?(:move_higher), true
   end
   
+  def test_injection
+    item = Article.new(:parent_id => 1)
+    assert_equal '"articles"."parent_id" = 1 AND "articles"."parent_type" IS NULL', item.scope_condition
+    assert_equal "position", item.position_column
+  end
+
+  def test_insert
+    new = Article.create(:parent_id => 20)
+    assert_equal 1, new.position
+    assert new.first?
+    assert new.last?
+  end
+  
   def test_items_are_ordered
     assert_equal @myItems, @articles.all.map(&:id)
   end
@@ -93,7 +106,6 @@ class ListTest < Test::Unit::TestCase
     assert_nil Article.first.higher_item
     assert_equal Article.find(3), Article.find(4).higher_item
     assert_nil Article.last.lower_item
-
   end
 end
 
@@ -115,6 +127,19 @@ class ArrayScopeListTest < Test::Unit::TestCase
     teardown_db
   end
   
+  def test_injection
+    item = Article.new(:parent_id => 1)
+    assert_equal '"articles"."parent_id" = 1 AND "articles"."parent_type" IS NULL', item.scope_condition
+    assert_equal "position", item.position_column
+  end
+
+  def test_insert
+    new = Article.create :parent_id => 20, :parent_type => 'ParentClass'
+    assert_equal 1, new.position
+    assert new.first?
+    assert new.last?
+  end
+
   def test_items_are_ordered
     assert_equal @myItems, @articles.all.map(&:id)
   end
@@ -183,6 +208,7 @@ class ListSubTest < Test::Unit::TestCase
       ((i % 2 == 1) ? Comment : Post).create! :position => i, :parent_id => 5000 
       @myItems.push Article.last.id
     end
+    @articles = Article.where(:parent_id=> 5000).order(:position)
   end
 
   def teardown
@@ -190,26 +216,28 @@ class ListSubTest < Test::Unit::TestCase
   end
   
   def test_items_are_ordered
-    assert_equal @myItems, Article.where(:parent_id=> 5000).order(:position).map(&:id)
+    assert_equal @myItems, @articles.all.map(&:id)
   end
   
   def test_move_lower
     Article.find(2).move_lower
-    assert_equal @myItems.move(1,2), Article.where(:parent_id => 5000).order(:position).map(&:id)
+    assert_equal @myItems.move(1,2), @articles.all.map(&:id)
   end
   
   def test_move_higher
     Article.find(2).move_higher
-    assert_equal @myItems.move(0,1), Article.where(:parent_id => 5000).order(:position).map(&:id)
+    assert_equal @myItems.move(0,1), @articles.all.map(&:id)
   end
   
-  def test_move_to_top_and_bottom
-    Article.find(1).move_to_bottom
-    assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5000).order(:position).map(&:id)
-    Article.find(1).move_to_top
+  def test_move_to_top
+    Article.last.move_to_top
     assert_equal @myItems.move(-1,0), Article.where(:parent_id=> 5000).order(:position).map(&:id)#
   end
   
+  def test_move_to_bottom
+    Article.first.move_to_bottom
+    assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5000).order(:position).map(&:id)
+  end
   def test_nil_return
     assert_equal Article.find(2), Article.find(1).lower_item
     assert_nil Article.first.higher_item
@@ -218,6 +246,3 @@ class ListSubTest < Test::Unit::TestCase
   end
 
 end
-#class Article < ActiveRecord::Base
-#  acts_as_list :column => "position", :scope => [:parent_id, :parent_type]  
-#end
