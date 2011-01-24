@@ -55,13 +55,13 @@ class ListTest < Test::Unit::TestCase
 
   def test_methods_available_for_array
       myArray = []
-      assert myArray.respond_to?(:move), true
+      assert myArray.respond_to?(:move)
   end
   
   def test_methods_available_for_list
     @article = Article.first
-    assert @article.respond_to?(:move_to_bottom), true
-    assert @article.respond_to?(:move_higher), true
+    assert @article.respond_to?(:move_to_bottom)
+    assert @article.respond_to?(:move_higher)
   end
   
   def test_injection
@@ -110,7 +110,7 @@ class ListTest < Test::Unit::TestCase
   
   def test_delete_middle
     Article.find(2).destroy
-    assert @myItems.delete_at(3), Article.where(:parent_id=>5).all.map(&:id)
+    assert_equal @myItems.delete_at(3), Article.where(:parent_id=>5).all.map(&:id)
   end
 end
 
