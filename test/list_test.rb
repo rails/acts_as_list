@@ -44,7 +44,7 @@ class ListTest < Test::Unit::TestCase
     setup_db
     (1..4).each do |counter| 
       Article.create! :position => counter, :parent_id => 5 
-      @myItems.push Article.last.id
+      @myItems.push Article.where(:parent_id=> 5).last.id
     end
     @articles = Article.where(:parent_id=> 5).order(:position)
   end
@@ -109,8 +109,9 @@ class ListTest < Test::Unit::TestCase
   end
   
   def test_delete_middle
-    Article.find(2).destroy
-    assert_equal @myItems.delete_at(3), Article.where(:parent_id=>5).all.map(&:id)
+    Article.find(3).destroy
+    @myItems.delete_at(2)
+    assert_equal @myItems, Article.where(:parent_id=>5).all.map(&:id)
   end
 end
 
