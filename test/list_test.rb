@@ -197,6 +197,8 @@ class ScopeAsStringTest < Test::Unit::TestCase
 
 end
 
+
+
 class Post < Article
 end
 
@@ -252,3 +254,51 @@ class ListSubTest < Test::Unit::TestCase
   end
 
 end
+
+class Article1 < Article
+end
+
+class Article2 < Article
+end
+
+class LimitedListTest1 < Test::Unit::TestCase
+   def setup
+    setup_db
+    Article1.send :acts_as_list,  :limited_list=>true
+    @new = Article1.create!(:parent_id=>500)
+  end
+
+  def teardown
+    teardown_db
+  end
+
+  def test_limited_list
+    assert Article1.limited_list?
+    assert_equal 1, @new.position
+    assert @new.first?
+    assert @new.last?
+  end
+
+  def test_insert_at_high_position
+    @new1 = Article1.new(:parent_id=>500)
+    @new1.insert_at(5)
+    @new1.save!
+    assert_equal @new1.position, @new.position + 1
+  end
+end
+
+class LimitedListTest2 < Test::Unit::TestCase
+  def setup
+    setup_db
+    @new = Article2.create!(:parent_id=>500)
+    Article2.send :acts_as_list,  :limited_list=>false
+  end
+  def teardown
+    teardown_db
+  end
+
+   def test_limited_list
+    assert_equal Article2.limited_list?, false
+   end
+end
+

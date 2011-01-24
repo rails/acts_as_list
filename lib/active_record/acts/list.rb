@@ -97,6 +97,11 @@ module ActiveRecord
         # Insert the item at the given position (defaults to the top position of 1).
         #i just changed here to verify if the limited_list is true
         def insert_at(position = 1)
+          if self.class.limited_list?
+            if position >  bottom_position_in_list + 1
+              position =  bottom_position_in_list + 1
+            end
+          end
           insert_at_position(position)
         end
 
