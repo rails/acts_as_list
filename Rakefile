@@ -7,10 +7,10 @@ begin
     gem.name        = "acts_as_list"
     gem.summary     = %Q{Gem version of acts_as_list Rails plugin}
     gem.description = %Q{Gem version of acts_as_list Rails plugin}
-    gem.email       = "bmichel@menfin.info"
-    gem.homepage    = "http://github.com/rails/acts_as_list"
-    gem.authors     = ["Bruno Michel", "Ryan Bates", "Rails Core"]
-    gem.add_dependency "activerecord", ">= 1.15.4.7794"
+    gem.email       = "victor.pereira@bigrails.com"
+    gem.homepage    = "http://github.com/vpereira/acts_as_list"
+    gem.authors     = ["Victor Pereira", "Ryan Bates", "Rails Core"]
+    gem.add_dependency "activerecord", ">= 3.0.0"
     gem.add_development_dependency "yard"
   end
   Jeweler::GemcutterTasks.new
