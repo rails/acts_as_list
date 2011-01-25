@@ -99,7 +99,7 @@ module ActiveRecord
         def insert_at(position = 1)
           if self.class.limited_list?
             if position >  bottom_position_in_list + 1
-              position =  bottom_position_in_list + 1
+              position =  bottom_position_in_list
             end
           end
           insert_at_position(position)

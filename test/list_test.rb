@@ -283,7 +283,7 @@ class LimitedListTest1 < Test::Unit::TestCase
     @new1 = Article1.new(:parent_id=>500)
     @new1.insert_at(5)
     @new1.save!
-    assert_equal @new1.position, @new.position + 1
+    assert_equal @new1.position, @new.position + 2
   end
 end
 
