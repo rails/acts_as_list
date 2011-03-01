@@ -20,8 +20,8 @@ module ActiveRecord
       #     acts_as_list :scope => :todo_list
       #   end
       #
-      #   todo_list.first.move_to_bottom
-      #   todo_list.last.move_higher
+      #   todo_list.todo_items.first.move_to_bottom
+      #   todo_list.todo_items.last.move_higher
       module ClassMethods
         # Configuration options are:
         #
