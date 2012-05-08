@@ -31,11 +31,17 @@ module ActiveRecord
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "1 = 1" }
+          configuration = { :column => "position", :scope => "1=1",:limited_list=>false }
           configuration.update(options) if options.is_a?(Hash)
 
+          
+          
+          self.class.send(:define_method,"limited_list?") { configuration[:limited_list] }
+          
+          #here if your scope receives a :symbol, it will try to add "_id" to the symbol, unless it has already an id in the end
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
+                    
           if configuration[:scope].is_a?(Symbol)
             scope_condition_method = %(
               def scope_condition
@@ -55,9 +61,16 @@ module ActiveRecord
             scope_condition_method = "def scope_condition() \"#{configuration[:scope]}\" end"
           end
 
+    
+          self.class_eval do
+            send(:scope,:list,order('position asc'))
+          end
+
+          
           class_eval <<-EOV
             include ActiveRecord::Acts::List::InstanceMethods
-
+  
+            
             def acts_as_list_class
               ::#{self.name}
             end
@@ -66,8 +79,10 @@ module ActiveRecord
               '#{configuration[:column]}'
             end
 
+            
             #{scope_condition_method}
 
+            
             before_destroy :decrement_positions_on_lower_items
             before_create  :add_to_list_bottom
           EOV
@@ -80,7 +95,13 @@ module ActiveRecord
       # the first in the list of all chapters.
       module InstanceMethods
         # Insert the item at the given position (defaults to the top position of 1).
+        #i just changed here to verify if the limited_list is true
         def insert_at(position = 1)
+          if self.class.limited_list?
+            if position >  bottom_position_in_list + 1
+              position =  bottom_position_in_list
+            end
+          end
           insert_at_position(position)
         end
 
@@ -93,7 +114,7 @@ module ActiveRecord
             increment_position
           end
         end
-
+        
         # Swap positions with the next higher item, if one exists.
         def move_higher
           return unless higher_item
@@ -159,17 +180,13 @@ module ActiveRecord
         # Return the next higher item in the list.
         def higher_item
           return nil unless in_list?
-          acts_as_list_class.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i - 1).to_s}"
-          )
+          acts_as_list_class.where("#{scope_condition} AND #{position_column} = #{(send(position_column).to_i - 1).to_s}").first
         end
 
         # Return the next lower item in the list.
         def lower_item
           return nil unless in_list?
-          acts_as_list_class.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}"
-          )
+          acts_as_list_class.where("#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}").first
         end
 
         # Test if this record is in a list
@@ -200,7 +217,7 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = "#{conditions} AND #{self.class.primary_key} != #{except.id}" if except
-            acts_as_list_class.find(:first, :conditions => conditions, :order => "#{position_column} DESC")
+            acts_as_list_class.where(conditions).order("#{position_column} DESC").first
           end
 
           # Forces item to assume the bottom position in the list.
