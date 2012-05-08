@@ -17,7 +17,7 @@ def setup_db
       t.column :position, :integer
       t.column :parent_id, :integer
       t.column :parent_type, :string
-      t.column :created_at, :datetime      
+      t.column :created_at, :datetime
       t.column :updated_at, :datetime
     end
   end
@@ -52,13 +52,13 @@ class ListTest < Test::Unit::TestCase
       myArray = []
       assert myArray.respond_to?(:move)
   end
-  
+
   def test_methods_available_for_list
     @article = Article.first
     assert @article.respond_to?(:move_to_bottom)
     assert @article.respond_to?(:move_higher)
   end
-  
+
   def test_injection
     item = Article.new(:parent_id => 1)
     assert_equal '"articles"."parent_id" = 1 AND "articles"."parent_type" IS NULL', item.scope_condition
@@ -71,38 +71,38 @@ class ListTest < Test::Unit::TestCase
     assert new.first?
     assert new.last?
   end
-  
+
   def test_items_are_ordered
     assert_equal @myItems, @articles.all.map(&:id)
   end
-  
+
   def test_move_lower
     Article.find(2).move_lower
     assert_equal @myItems.move(1,2), @articles.all.map(&:id)
   end
-  
+
   def test_move_higher
     Article.find(2).move_higher
     assert_equal @myItems.move(0,1), @articles.all.map(&:id)
   end
-  
+
   def test_move_to_bottom
     Article.first.move_to_bottom
     assert_equal @myItems.move(0,-1), @articles.all.map(&:id)
   end
-  
+
   def test_move_to_top
     Article.last.move_to_top
     assert_equal @myItems.move(-1,0), @articles.all.map(&:id)  
   end
-  
+
   def test_nil_return
     assert_equal Article.find(2), Article.find(1).lower_item
     assert_nil Article.first.higher_item
     assert_equal Article.find(3), Article.find(4).higher_item
     assert_nil Article.last.lower_item
   end
-  
+
   def test_delete_middle
     Article.find(3).destroy
     @myItems.delete_at(2)
@@ -127,7 +127,7 @@ class ArrayScopeListTest < Test::Unit::TestCase
   def teardown
     teardown_db
   end
-  
+
   def test_injection
     item = Article.new(:parent_id => 1)
     assert_equal '"articles"."parent_id" = 1 AND "articles"."parent_type" IS NULL', item.scope_condition
@@ -144,27 +144,27 @@ class ArrayScopeListTest < Test::Unit::TestCase
   def test_items_are_ordered
     assert_equal @myItems, @articles.all.map(&:id)
   end
-  
+
   def test_move_lower
     Article.find(2).move_lower
     assert_equal @myItems.move(1,2), @articles.all.map(&:id)
   end
-  
+
   def test_move_higher
     Article.find(2).move_higher
     assert_equal @myItems.move(0,1), @articles.all.map(&:id)
   end
-  
+
   def test_move_to_bottom
     Article.first.move_to_bottom
     assert_equal @myItems.move(0,-1), @articles.all.map(&:id)
   end
-  
+
   def test_move_to_top
     Article.last.move_to_top
     assert_equal @myItems.move(-1,0), @articles.all.map(&:id)
   end
-  
+
   def test_nil_return
     assert_equal Article.find(2), Article.find(1).lower_item
     assert_nil Article.first.higher_item
@@ -178,7 +178,7 @@ class ScopeAsStringTest < Test::Unit::TestCase
     setup_db
     Article.send :acts_as_list, :column => "position", :scope => 'parent_id = #{parent_id}'
   end
-  
+
   def teardown
     teardown_db
   end
@@ -217,26 +217,26 @@ class ListSubTest < Test::Unit::TestCase
   def teardown
     teardown_db
   end
-  
+
   def test_items_are_ordered
     assert_equal @myItems, @articles.all.map(&:id)
   end
-  
+
   def test_move_lower
     Article.find(2).move_lower
     assert_equal @myItems.move(1,2), @articles.all.map(&:id)
   end
-  
+
   def test_move_higher
     Article.find(2).move_higher
     assert_equal @myItems.move(0,1), @articles.all.map(&:id)
   end
-  
+
   def test_move_to_top
     Article.last.move_to_top
     assert_equal @myItems.move(-1,0), Article.where(:parent_id=> 5000).order(:position).map(&:id)#
   end
-  
+
   def test_move_to_bottom
     Article.first.move_to_bottom
     assert_equal @myItems.move(0,-1), Article.where(:parent_id=> 5000).order(:position).map(&:id)
