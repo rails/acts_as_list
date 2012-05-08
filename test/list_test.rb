@@ -1,10 +1,5 @@
+require File.expand_path(File.join(File.dirname(__FILE__),'..','init'))
 require 'test/unit'
-
-require 'rubygems'
-gem 'activerecord', '>= 3.0.0'
-require 'active_record'
-
-require "#{File.expand_path('../init',File.dirname(__FILE__))}"
 
 class Array
   def move(from, to)
@@ -48,7 +43,7 @@ class ListTest < Test::Unit::TestCase
     end
     @articles = Article.where(:parent_id=> 5).order(:position)
   end
-  
+
   def teardown
     teardown_db
   end
