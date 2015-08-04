@@ -84,7 +84,11 @@ module ActiveRecord
             end
 
             def acts_as_list_class
-              ::#{self.name}
+              if #{configuration}[:ignore_sti]
+                ::#{self.name}.base_class
+              else
+                ::#{self.name}
+              end
             end
 
             def position_column
@@ -279,8 +283,7 @@ module ActiveRecord
 
         private
           def acts_as_list_list
-            klass = configuration[:ignore_sti] ? acts_as_list_class.base_class : acts_as_list_class
-            klass.unscoped do
+            acts_as_list_class.unscoped do
               acts_as_list_class.where(scope_condition)
             end
           end
