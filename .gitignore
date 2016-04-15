@@ -1,0 +1,11 @@
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
+.rvmrc
+*.tmproj
+.rbenv-version
+.ruby-gemset
+.ruby-version
+# Appraisal generated lockfiles
+*.gemfile.lock
